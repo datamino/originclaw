@@ -1,6 +1,6 @@
 [project]
 name = "originclaw-monitor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Observability for OpenClaw agentic AI deployments — monitoring, alerting, watchdog, dashboard"
 readme = "README.md"
 requires-python = ">=3.9"

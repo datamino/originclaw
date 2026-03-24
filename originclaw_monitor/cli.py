@@ -175,6 +175,48 @@ def cmd_test_alert(args):
     except:
         print(f"❌ Error: {r.stdout}")
 
+
+def cmd_help(args=None):
+    B = chr(27)+'[1m'
+    G = chr(27)+'[0;32m'
+    C = chr(27)+'[0;36m'
+    D = chr(27)+'[2m'
+    R = chr(27)+'[0m'
+    print(B+'  OriginClaw Monitor'+R+' — Observability for OpenClaw deployments')
+    print(D+'  v0.1.0 · github.com/datamino/originclaw'+R)
+    print()
+    print(B+'  SETUP'+R)
+    print(G+'  originclaw-monitor init         '+R+' Auto-discover OpenClaw and configure')
+    print(G+'  originclaw-monitor status       '+R+' Full system health at a glance')
+    print(G+'  originclaw-monitor test-alert   '+R+' Send test email to verify alerts work')
+    print()
+    print(B+'  MONITORING'+R)
+    print(G+'  originclaw-monitor start        '+R+' Start watchdog + monitoring daemon')
+    print(G+'  originclaw-monitor run          '+R+' Run one full check cycle (all layers)')
+    print(G+'  originclaw-monitor watchdog     '+R+' Start gateway watchdog (instant alerts)')
+    print(G+'  originclaw-monitor dashboard    '+R+' Web dashboard at http://localhost:8787')
+    print()
+    print(B+'  WHAT IT MONITORS'+R)
+    print(C+'  Layer 1'+R+' — Infrastructure    CPU · Memory · Disk · Network')
+    print(C+'  Layer 2'+R+' — OpenClaw Core     Gateway · Crons · Heartbeat · Sessions')
+    print(C+'  Layer 3'+R+' — Integrations      Gmail · Calendar · APIs · MCP servers')
+    print(C+'  Layer 4'+R+' — Skills & Daemons  Python scripts · Background processes')
+    print(C+'  Layer 5'+R+' — Business          Morning brief · S&P alerts · Delivery')
+    print()
+    print(B+'  ALERT CHANNELS'+R)
+    print('  telegram_token + telegram_chat_id   Telegram alerts')
+    print('  resend_api_key + developer_email    Email via Resend')
+    print('  discord_webhook                     Discord alerts')
+    print('  slack_webhook                       Slack alerts')
+    print()
+    print(B+'  WATCHDOG'+R)
+    print('  Checks gateway every 1s — fires alert the moment it goes down.')
+    print('  Recovery alert when it comes back. Fully independent of OpenClaw.')
+    print()
+    print(B+'  INSTALL'+R)
+    print(D+'  pip install originclaw-monitor'+R)
+    print()
+
 def main():
     parser = argparse.ArgumentParser(
         prog="originclaw-monitor",
@@ -188,6 +230,7 @@ def main():
     sub.add_parser("test-alert",  help="Send test alert email")
     sub.add_parser("watchdog",    help="Start gateway watchdog")
     sub.add_parser("dashboard",   help="Start web dashboard")
+    sub.add_parser("help", help="Show all commands and features")
     args = parser.parse_args()
 
     if args.command == "init":        cmd_init(args)
@@ -195,11 +238,12 @@ def main():
     elif args.command == "watchdog":  cmd_watchdog(args)
     elif args.command == "test-alert":cmd_test_alert(args)
     elif args.command == "dashboard": cmd_dashboard(args)
+    elif args.command == "help": cmd_help(args)
     elif args.command == "start":
         print("Starting monitor... (run: originclaw-monitor status to check)")
         cmd_watchdog(args)
     else:
-        parser.print_help()
+        cmd_help(args)
 
 if __name__ == "__main__":
     main()
