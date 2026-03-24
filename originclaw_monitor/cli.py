@@ -134,25 +134,50 @@ def cmd_status(args):
     print(f"  Dashboard       http://localhost:8787")
     print("─"*50 + "\n")
 
-def cmd_watchdog(args):
-    watchdog_script = os.path.expanduser("~/.originclaw/gw-watch.py")
-    if not os.path.exists(watchdog_script):
-        print("❌ Watchdog script not found. Run: originclaw-monitor init")
-        sys.exit(1)
-    print("Starting gateway watchdog...")
-    os.system(f"nohup python3 {watchdog_script} >> {LOG_DIR}/gw-watch.log 2>&1 &")
-    time.sleep(2)
-    r = subprocess.run(["pgrep","-f","gw-watch.py"], capture_output=True, text=True)
-    if r.stdout.strip():
-        print(f"✅ Watchdog running (PID {r.stdout.strip()})")
-    else:
-        print("❌ Watchdog failed to start")
+
+def cmd_watchdog(args=None):
+    import os, sys, time
+    config = load_config()
+    gw_port = config.get("gateway_port", 18789)
+    resend_key = config.get("resend_api_key", os.environ.get("RESEND_API_KEY",""))
+    dev_email = config.get("developer_email","")
+    tg_token = config.get("telegram_token","")
+    tg_chat = config.get("telegram_chat_id","")
+    client = config.get("client_name","OpenClaw")
+    import subprocess, json as _json
+    print(f"Starting gateway watchdog — checking every 1s")
+    prev = True
+    while True:
+        try:
+            r = subprocess.run(["curl","-sf","--max-time","1",f"http://localhost:{gw_port}/health"],capture_output=True,text=True,timeout=2)
+            alive = r.returncode==0 and ("ok" in r.stdout or "live" in r.stdout)
+        except:
+            alive = False
+        ts = time.strftime("%H:%M:%S")
+        if prev and not alive:
+            print(f"[{ts}] Gateway DOWN — firing alert")
+            msg = "Gateway DOWN" + chr(10) + client + chr(10) + "Detected: " + ts
+            if tg_token and tg_chat:
+                subprocess.run(["curl","-sf","-X","POST",f"https://api.telegram.org/bot{tg_token}/sendMessage","-H","Content-Type: application/json","-d",_json.dumps({"chat_id":tg_chat,"text":msg})],capture_output=True,timeout=10)
+            if resend_key and dev_email:
+                subprocess.run(["curl","-sf","-X","POST","https://api.resend.com/emails","-H",f"Authorization: Bearer {resend_key}","-H","Content-Type: application/json","-d",_json.dumps({"from":"OriginClaw <onboarding@resend.dev>","to":[dev_email],"subject":f"Gateway DOWN — {client}","html":f"<p>Gateway offline at {ts}</p>"})],capture_output=True,timeout=15)
+        elif not prev and alive:
+            print(f"[{ts}] Gateway RESTORED")
+            msg = "Gateway RESTORED" + chr(10) + client + chr(10) + "Back online: " + ts
+            if tg_token and tg_chat:
+                subprocess.run(["curl","-sf","-X","POST",f"https://api.telegram.org/bot{tg_token}/sendMessage","-H","Content-Type: application/json","-d",_json.dumps({"chat_id":tg_chat,"text":msg})],capture_output=True,timeout=10)
+        else:
+            print(f"[{ts}] Gateway {chr(79)+chr(75) if alive else chr(68)+chr(79)+chr(87)+chr(78)}")
+        prev = alive
+        time.sleep(1)
+
 
 def cmd_dashboard(args):
     pkg_dir = os.path.dirname(os.path.abspath(__file__))
     api_path = os.path.join(pkg_dir, "..", "packages", "monitor-core", "src", "api.py")
     print("Starting dashboard API on http://localhost:8787 ...")
-    os.system(f"uvicorn packages.monitor-core.src.api:app --host 127.0.0.1 --port 8787 --reload &")
+    import subprocess as _sp
+    _sp.Popen(["python3","-m","uvicorn","originclaw_monitor.api:app","--host","127.0.0.1","--port","8787"])
     print("Dashboard: http://localhost:5173 (run: cd dashboard && npm run dev)")
 
 def cmd_test_alert(args):
@@ -175,6 +200,23 @@ def cmd_test_alert(args):
     except:
         print(f"❌ Error: {r.stdout}")
 
+
+
+def cmd_run(args=None):
+    config = load_config()
+    print(f"Running checks for {config[chr(99)+chr(108)+chr(105)+chr(101)+chr(110)+chr(116)+chr(95)+chr(110)+chr(97)+chr(109)+chr(101)]}...")
+    from .collector import collect_all
+    from .discovery import discover_openclaw
+    discovered = discover_openclaw()
+    results = collect_all(discovered, config)
+    ok = sum(1 for v in results.values() if isinstance(v,dict) and v.get("status")=="ok")
+    issues = sum(1 for v in results.values() if isinstance(v,dict) and v.get("status") not in ("ok",None))
+    print(f"  {ok} healthy, {issues} issues")
+    for comp, data in results.items():
+        if isinstance(data, dict):
+            s = data.get("status","ok")
+            icon = "checkmark" if s=="ok" else "warning"
+            print(f"  {comp}: {s}")
 
 def cmd_help(args=None):
     B = chr(27)+'[1m'
@@ -256,6 +298,7 @@ def main():
     elif args.command == "test-alert":cmd_test_alert(args)
     elif args.command == "dashboard": cmd_dashboard(args)
     elif args.command == "help": cmd_help(args)
+    elif args.command == "run": cmd_run(args)
     elif args.command == "start":
         print("Starting monitor... (run: originclaw-monitor status to check)")
         cmd_watchdog(args)
