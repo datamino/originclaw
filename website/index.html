@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OriginClaw Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0c10;--bg2:#0f1318;--card:#141920;--border:#1e2535;--text:#e8edf5;--muted:#8b9bb4;--dim:#4a5568;--accent:#4f6ef7;--ok:#10b981;--warn:#f59e0b;--crit:#ef4444;--grad:linear-gradient(135deg,#4f6ef7,#7c3aed)}
+html{scroll-behavior:smooth}
+body{font-family:Inter,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+code,pre{font-family:JetBrains Mono,monospace}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,12,16,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 48px;height:60px;display:flex;align-items:center;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-links{display:flex;gap:24px;margin-left:auto}
+.nav-links a{color:var(--muted);font-size:14px;font-weight:500}
+.nav-links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:9px;font-weight:600;font-size:14px;border:none;cursor:pointer}
+.btn-primary{background:var(--grad);color:#fff}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.hero{padding:160px 48px 100px;text-align:center;position:relative}
+.hero::before{content:"";position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(ellipse,rgba(79,110,247,0.1) 0%,transparent 70%);pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(79,110,247,0.1);border:1px solid rgba(79,110,247,0.3);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:24px}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:p 2s ease infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:0.4}}
+h1{font-size:clamp(40px,6vw,68px);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:20px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:17px;color:var(--muted);max-width:540px;margin:0 auto 40px}
+.hero-actions{display:flex;gap:10px;justify-content:center;margin-bottom:40px}
+.cmd-pill{display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:14px}
+.cmd-pill code{color:var(--ok)}
+.copy{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:11px;color:var(--muted);cursor:pointer}
+.copy:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stats{display:flex;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stat{flex:1;text-align:center;padding:44px 20px;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-n{font-size:40px;font-weight:900;letter-spacing:-0.04em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
+section{padding:96px 48px;max-width:1100px;margin:0 auto}
+.tag{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-bottom:10px}
+h2{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-0.03em;margin-bottom:14px;line-height:1.1}
+.sub{font-size:16px;color:var(--muted);max-width:500px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:44px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:44px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.card:hover{border-color:rgba(79,110,247,0.4)}
+.layer-n{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:0.12em;font-family:JetBrains Mono,monospace;margin-bottom:6px}
+.card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.card p{font-size:13px;color:var(--muted);line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag2{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;padding:2px 9px;font-size:11px;color:var(--muted)}
+.ficon{width:38px;height:38px;border-radius:9px;background:rgba(79,110,247,0.1);border:1px solid rgba(79,110,247,0.2);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
+.cmds{display:flex;flex-direction:column;gap:7px;margin-top:44px}
+.cmd{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px 20px;display:flex;align-items:center;gap:16px}
+.cmd code{font-size:13px;color:var(--ok);min-width:260px;flex-shrink:0}
+.cmd span{font-size:13px;color:var(--muted);flex:1}
+.cmd-badge{font-size:10px;background:rgba(79,110,247,0.12);color:var(--accent);border-radius:4px;padding:2px 7px;font-weight:600;flex-shrink:0}
+.chans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:44px}
+.chan{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px}
+.chan-icon{font-size:22px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border-radius:9px;border:1px solid var(--border)}
+.chan h4{font-size:14px;font-weight:600}
+.chan p{font-size:11px;color:var(--dim);font-family:JetBrains Mono,monospace;margin-top:2px}
+.wdbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px;margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.flow{display:flex;flex-direction:column;gap:7px}
+.fstep{display:flex;align-items:center;gap:10px;font-size:14px}
+.fdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fline{width:1px;height:18px;background:var(--border);margin-left:3.5px}
+.term{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;font-family:JetBrains Mono,monospace;font-size:12px;line-height:1.9}
+.isteps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:44px}
+.istep{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative}
+.snum{position:absolute;top:-11px;left:18px;background:var(--grad);color:#fff;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.istep h3{font-size:14px;font-weight:700;margin:10px 0 6px}
+.istep p{font-size:12px;color:var(--muted)}
+.scode{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:9px 13px;font-size:12px;font-family:JetBrains Mono,monospace;color:var(--ok);margin-top:10px}
+.cfg{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin-top:20px}
+.cfg-label{font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
+footer{border-top:1px solid var(--border);padding:36px 48px;display:flex;align-items:center;justify-content:space-between}
+.flinks{display:flex;gap:22px}
+.flinks a{color:var(--dim);font-size:13px}
+.flinks a:hover{color:var(--muted)}
+.fcopy{font-size:12px;color:var(--dim)}
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:110px 20px 60px}section{padding:60px 20px}.grid2,.grid3,.chans,.wdbox,.isteps{grid-template-columns:1fr}footer{flex-direction:column;gap:14px;text-align:center}.stats{flex-wrap:wrap}.stat{min-width:50%}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><div class="logo-icon">&#x2B21;</div>OriginClaw Monitor</div>
+  <div class="nav-links">
+    <a href="#features">Features</a><a href="#docs">Docs</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/datamino/originclaw" target="_blank">GitHub</a>
+  </div>
+  <a href="#install" class="btn btn-primary" style="margin-left:24px">Get Started</a>
+</nav>
+
+<div class="hero">
+  <div class="badge"><div class="badge-dot"></div>Open Source &middot; v0.1.2 &middot; MIT License</div>
+  <h1>Observability for<br><span class="grad-text">OpenClaw Deployments</span></h1>
+  <p class="hero-sub">Monitor every component of your OpenClaw AI deployment. Get instant alerts when anything breaks. Works on macOS and Linux.</p>
+  <div class="hero-actions">
+    <a href="#install" class="btn btn-primary">Get Started &rarr;</a>
+    <a href="https://github.com/datamino/originclaw" class="btn btn-secondary" target="_blank">View on GitHub</a>
+  </div>
+  <div class="cmd-pill">
+    <code>pip3 install originclaw-monitor</code>
+    <button class="copy" onclick="navigator.clipboard.writeText('pip3 install originclaw-monitor')">copy</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">5</div><div class="stat-l">Monitoring Layers</div></div>
+  <div class="stat"><div class="stat-n">1s</div><div class="stat-l">Watchdog Interval</div></div>
+  <div class="stat"><div class="stat-n">4</div><div class="stat-l">Alert Channels</div></div>
+  <div class="stat"><div class="stat-n">0</div><div class="stat-l">Config Required</div></div>
+</div>
+
+<section id="features">
+  <div class="tag">What it monitors</div>
+  <h2>Every layer of your<br>OpenClaw deployment</h2>
+  <p class="sub">Auto-discovers your OpenClaw setup and monitors everything from infrastructure to business outcomes.</p>
+  <div class="grid2">
+    <div class="card"><div class="layer-n">LAYER 1</div><h3>Infrastructure</h3><p>CPU, memory, disk and network health of the host machine.</p><div class="tags"><span class="tag2">CPU</span><span class="tag2">Memory</span><span class="tag2">Disk</span><span class="tag2">Network</span></div></div>
+    <div class="card"><div class="layer-n">LAYER 2</div><h3>OpenClaw Core</h3><p>Gateway process, cron jobs, heartbeat, and active sessions.</p><div class="tags"><span class="tag2">Gateway</span><span class="tag2">Cron Jobs</span><span class="tag2">Heartbeat</span><span class="tag2">Sessions</span></div></div>
+    <div class="card"><div class="layer-n">LAYER 3</div><h3>Integrations</h3><p>All connected APIs and MCP servers auto-discovered from your config.</p><div class="tags"><span class="tag2">Gmail</span><span class="tag2">Calendar</span><span class="tag2">APIs</span><span class="tag2">MCP Servers</span></div></div>
+    <div class="card"><div class="layer-n">LAYER 4 &amp; 5</div><h3>Skills &amp; Business Outcomes</h3><p>Background daemons, skills, and delivery of business-critical outputs.</p><div class="tags"><span class="tag2">Daemons</span><span class="tag2">Scripts</span><span class="tag2">Alerts</span><span class="tag2">Briefs</span></div></div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="grid3">
+    <div class="card"><div class="ficon">&#x26A1;</div><h3>Instant Watchdog</h3><p>Checks every 1 second. Fires email and Telegram the moment your gateway goes down.</p></div>
+    <div class="card"><div class="ficon">&#x1F50D;</div><h3>Auto-Discovery</h3><p>Reads your openclaw.json automatically. No manual config. Works with any deployment.</p></div>
+    <div class="card"><div class="ficon">&#x1F4E7;</div><h3>Multi-Channel Alerts</h3><p>Telegram, Email, Discord, Slack. 3-strike confirmation prevents false alarms.</p></div>
+    <div class="card"><div class="ficon">&#x1F4CA;</div><h3>Live Dashboard</h3><p>Premium React topology dashboard. Real-time data. Drag and expand components.</p></div>
+    <div class="card"><div class="ficon">&#x1F527;</div><h3>Self-Healing</h3><p>Attempts automatic recovery before alerting. Restarts failed processes automatically.</p></div>
+    <div class="card"><div class="ficon">&#x1F310;</div><h3>Multi-Client</h3><p>One install monitors multiple OpenClaw deployments with isolated alerts per client.</p></div>
+  </div>
+</section>
+
+<section id="docs">
+  <div class="tag">Documentation</div>
+  <h2>All commands</h2>
+  <p class="sub">Everything you can do with originclaw-monitor.</p>
+  <div class="cmds">
+    <div class="cmd"><code>originclaw-monitor init</code><span>Auto-discover OpenClaw and configure monitoring. Reads openclaw.json, mcporter.json, LaunchAgents.</span><div class="cmd-badge">SETUP</div></div>
+    <div class="cmd"><code>originclaw-monitor status</code><span>Show full system health. Gateway, crons, heartbeat, integrations, daemons, last heartbeat.</span><div class="cmd-badge">STATUS</div></div>
+    <div class="cmd"><code>originclaw-monitor start</code><span>Start monitoring daemon and gateway watchdog. Runs in background, alerts on failures.</span><div class="cmd-badge">START</div></div>
+    <div class="cmd"><code>originclaw-monitor run</code><span>Run one full check cycle across all 5 layers. Good for testing or one-off health checks.</span><div class="cmd-badge">RUN</div></div>
+    <div class="cmd"><code>originclaw-monitor watchdog</code><span>Start gateway watchdog. Checks every 1 second, fires alert immediately on first failure.</span><div class="cmd-badge">WATCHDOG</div></div>
+    <div class="cmd"><code>originclaw-monitor dashboard</code><span>Start monitoring API and web dashboard. Opens topology view at http://localhost:8787.</span><div class="cmd-badge">UI</div></div>
+    <div class="cmd"><code>originclaw-monitor test-alert</code><span>Send a test email and Telegram message to verify alert channels are configured correctly.</span><div class="cmd-badge">TEST</div></div>
+    <div class="cmd"><code>originclaw-monitor help</code><span>Show all commands with descriptions. Also runs when no command is provided.</span><div class="cmd-badge">HELP</div></div>
+  </div>
+</section>
+<section style="padding-top:0"><div class="tag">Alert Channels</div><h2>Get notified anywhere</h2><div class="chans"><div class="chan"><div class="chan-icon">✈️</div><div><h4>Telegram</h4><p>telegram_token + telegram_chat_id</p></div></div><div class="chan"><div class="chan-icon">📧</div><div><h4>Email via Resend</h4><p>resend_api_key + developer_email</p></div></div><div class="chan"><div class="chan-icon">💬</div><div><h4>Discord</h4><p>discord_webhook</p></div></div><div class="chan"><div class="chan-icon">⏭️</div><div><h4>Slack</h4><p>slack_webhook</p></div></div></div></section><section id="install"><div class="tag">Installation</div><h2>Up and running in 3 commands</h2><p class="sub">Works on macOS and Linux. Python 3.9+ required.</p>
+<div class="isteps">
+<div class="istep"><div class="snum">1</div><h3>Install</h3><p>Install from PyPI.</p><div class="scode">pip3 install originclaw-monitor</div></div>
+<div class="istep"><div class="snum">2</div><h3>Configure</h3><p>Auto-discovers OpenClaw setup.</p><div class="scode">originclaw-monitor init</div></div>
+<div class="istep"><div class="snum">3</div><h3>Start</h3><p>Watchdog starts immediately.</p><div class="scode">originclaw-monitor start</div></div>
+</div>
+<div class="cfg"><div class="cfg-label">~/.originclaw/config.json</div>
+<pre style="font-size:13px;color:var(--muted);line-height:1.9">{
+  <span style="color:var(--accent)">&quot;client_name&quot;</span>: <span style="color:var(--ok)">&quot;Wayne Bos&quot;</span>,
+  <span style="color:var(--accent)">&quot;developer_email&quot;</span>: <span style="color:var(--ok)">&quot;dev@example.com&quot;</span>,
+  <span style="color:var(--accent)">&quot;resend_api_key&quot;</span>: <span style="color:var(--ok)">&quot;re_...&quot;</span>,
+  <span style="color:var(--accent)">&quot;telegram_token&quot;</span>: <span style="color:var(--ok)">&quot;bot_token&quot;</span>,
+  <span style="color:var(--accent)">&quot;telegram_chat_id&quot;</span>: <span style="color:var(--ok)">&quot;123456789&quot;</span>,
+  <span style="color:var(--accent)">&quot;interval_seconds&quot;</span>: <span style="color:var(--warn)">300</span>
+}</pre></div></section>
+<footer>
+<div class="logo"><div class="logo-icon" style="width:24px;height:24px;font-size:12px">⬡</div>OriginClaw Monitor</div>
+<div class="flinks"><a href="https://github.com/datamino/originclaw" target="_blank">GitHub</a><a href="https://pypi.org/project/originclaw-monitor/" target="_blank">PyPI</a><a href="#docs">Docs</a><a href="#install">Install</a></div>
+<div class="fcopy">&copy; 2026 Origin Studios &middot; MIT License</div>
+</footer></body></html>
