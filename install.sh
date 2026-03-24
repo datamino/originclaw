@@ -16,7 +16,7 @@ if [ -z "$PYTHON" ]; then echo Python not found. Install from python.org; exit 1
 
 # Install
 echo '  Installing originclaw-monitor...'
-"$PYTHON" -m pip install originclaw-monitor --user -q 2>/dev/null || "$PYTHON" -m pip install originclaw-monitor --user -q --break-system-packages 2>/dev/null || true
+"$PYTHON" -m pip install --upgrade --force-reinstall originclaw-monitor --user -q 2>/dev/null || "$PYTHON" -m pip install originclaw-monitor --user -q --break-system-packages 2>/dev/null || true
 
 # Fix PATH — find the actual install location
 PY_VER=$("$PYTHON" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
