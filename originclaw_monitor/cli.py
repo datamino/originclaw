@@ -217,7 +217,25 @@ def cmd_help(args=None):
     print(D+'  pip install originclaw-monitor'+R)
     print()
 
+def _fix_path():
+    import sys, os
+    ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+    home = os.path.expanduser("~")
+    for d in [f"{home}/Library/Python/{ver}/bin", f"{home}/.local/bin"]:
+        if os.path.isfile(os.path.join(d, "originclaw-monitor")):
+            if d not in os.environ.get("PATH", ""):
+                for rc in [f"{home}/.zshenv", f"{home}/.zshrc", f"{home}/.bashrc"]:
+                    try:
+                        content = open(rc).read() if os.path.exists(rc) else ""
+                        if d not in content:
+                            open(rc, "a").write(f"
+export PATH="{d}:\/Users/valen/Library/Python/3.9/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/valen/Library/Python/3.9/bin"
+")
+                    except: pass
+            break
+
 def main():
+    _fix_path()
     parser = argparse.ArgumentParser(
         prog="originclaw-monitor",
         description="⬡ OriginClaw Monitor — Observability for OpenClaw deployments"
