@@ -42,6 +42,15 @@ def save_config(config):
 
 def cmd_init(args):
     from .discovery import discover_openclaw, print_discovery
+    # Check if already configured
+    if os.path.exists(CONFIG_PATH):
+        existing = load_config()
+        print()
+        print('  Config found for: ' + existing.get('client_name', 'unknown'))
+        rerun = input('  Already configured. Re-run setup? (yes/no): ').strip().lower()
+        if rerun != 'yes':
+            print('  Skipped. Run: originclaw-monitor status')
+            return
     discovered = discover_openclaw()
     print_discovery(discovered)
     # Pre-populate config from discovered values
@@ -218,6 +227,77 @@ def cmd_run(args=None):
             icon = "checkmark" if s=="ok" else "warning"
             print(f"  {comp}: {s}")
 
+
+def cmd_uninstall(args=None):
+    import shutil, subprocess, os
+    print()
+    print('  OriginClaw Monitor — Uninstaller')
+    print('  ' + '-'*38)
+    confirm = input('  Remove all config and uninstall? (yes/no): ').strip().lower()
+    if confirm != 'yes':
+        print('  Cancelled.')
+        return
+    # Remove config
+    cfg_dir = os.path.expanduser('~/.originclaw')
+    if os.path.exists(cfg_dir):
+        shutil.rmtree(cfg_dir)
+        print('  Config removed: ~/.originclaw')
+    # Remove watchdog LaunchAgents
+    la_dir = os.path.expanduser('~/Library/LaunchAgents')
+    for name in ['com.originclaw.watchdog', 'com.originclaw.heartbeat-ping']:
+        plist = os.path.join(la_dir, name + '.plist')
+        if os.path.exists(plist):
+            subprocess.run(['launchctl', 'unload', plist], capture_output=True)
+            os.remove(plist)
+            print('  Removed LaunchAgent: ' + name)
+    # Uninstall package
+    subprocess.run(['pip3', 'uninstall', 'originclaw-monitor', '-y',
+        '--break-system-packages'], capture_output=True)
+    subprocess.run(['pip3', 'uninstall', 'originclaw-monitor', '-y'],
+        capture_output=True)
+    print('  Package uninstalled.')
+    print()
+    print('  OriginClaw Monitor removed successfully.')
+    print('  ' + '-'*38)
+    print()
+
+def cmd_update(args=None):
+    import subprocess, sys
+    print()
+    print('  Checking for updates...')
+    try:
+        import urllib.request, json as _j
+        r = urllib.request.urlopen('https://pypi.org/pypi/originclaw-monitor/json')
+        latest = _j.loads(r.read())['info']['version']
+        from originclaw_monitor import __version__
+        current = __version__
+        print('  Current: v' + current)
+        print('  Latest:  v' + latest)
+        if current == latest:
+            print('  Already up to date.')
+            return
+        print('  Updating to v' + latest + '...')
+    except:
+        print('  Updating...')
+    r = subprocess.run([sys.executable, '-m', 'pip', 'install', '--upgrade',
+        '--force-reinstall', 'originclaw-monitor', '--user',
+        '--break-system-packages', '-q'],
+        capture_output=True, text=True)
+    if r.returncode == 0:
+        print('  Updated successfully.')
+        print('  Run: originclaw-monitor status')
+    else:
+        # Try without break-system-packages
+        r2 = subprocess.run([sys.executable, '-m', 'pip', 'install',
+            '--upgrade', '--force-reinstall', 'originclaw-monitor', '--user', '-q'],
+            capture_output=True, text=True)
+        if r2.returncode == 0:
+            print('  Updated successfully.')
+        else:
+            print('  Update failed. Try manually:')
+            print('  pip3 install --upgrade --force-reinstall originclaw-monitor --user --break-system-packages')
+    print()
+
 def cmd_help(args=None):
     B = chr(27)+'[1m'
     G = chr(27)+'[0;32m'
@@ -289,7 +369,9 @@ def main():
     sub.add_parser("test-alert",  help="Send test alert email")
     sub.add_parser("watchdog",    help="Start gateway watchdog")
     sub.add_parser("dashboard",   help="Start web dashboard")
-    sub.add_parser("help", help="Show all commands and features")
+    sub.add_parser("help",        help="Show all commands and features")
+    sub.add_parser("uninstall",   help="Remove OriginClaw Monitor and all config")
+    sub.add_parser("update",      help="Update to the latest version")
     args = parser.parse_args()
 
     if args.command == "init":        cmd_init(args)
@@ -297,7 +379,9 @@ def main():
     elif args.command == "watchdog":  cmd_watchdog(args)
     elif args.command == "test-alert":cmd_test_alert(args)
     elif args.command == "dashboard": cmd_dashboard(args)
-    elif args.command == "help": cmd_help(args)
+    elif args.command == "help":      cmd_help(args)
+    elif args.command == "uninstall": cmd_uninstall(args)
+    elif args.command == "update":    cmd_update(args)
     elif args.command == "run": cmd_run(args)
     elif args.command == "start":
         print("Starting monitor... (run: originclaw-monitor status to check)")
