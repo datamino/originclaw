@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+
+:root {
+  --bg: #f0f2f7;
+  --bg-card: rgba(255,255,255,0.72);
+  --bg-card-hover: rgba(255,255,255,0.92);
+  --bg-glass: rgba(255,255,255,0.55);
+  --border: rgba(180,190,210,0.45);
+  --border-strong: rgba(140,160,200,0.6);
+  --text-primary: #0f1623;
+  --text-secondary: #5a6480;
+  --text-muted: #9aa3b8;
+  --accent: #4f6ef7;
+  --accent2: #7c3aed;
+  --ok: #059669;
+  --ok-bg: rgba(5,150,105,0.08);
+  --ok-border: rgba(5,150,105,0.25);
+  --warn: #d97706;
+  --warn-bg: rgba(217,119,6,0.08);
+  --warn-border: rgba(217,119,6,0.3);
+  --crit: #dc2626;
+  --crit-bg: rgba(220,38,38,0.08);
+  --crit-border: rgba(220,38,38,0.3);
+  --offline: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(15,22,35,0.06), 0 4px 16px rgba(15,22,35,0.06);
+  --shadow-md: 0 4px 24px rgba(15,22,35,0.10), 0 1px 4px rgba(15,22,35,0.06);
+  --shadow-lg: 0 8px 40px rgba(15,22,35,0.14), 0 2px 8px rgba(15,22,35,0.06);
+  --shadow-focus: 0 0 0 3px rgba(79,110,247,0.18);
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root { height: 100vh; display: flex; flex-direction: column; }
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+.react-flow__background { background: var(--bg) !important; }
+.react-flow__controls { box-shadow: var(--shadow-md) !important; border-radius: 10px !important; overflow: hidden; border: 1px solid var(--border) !important; }
+.react-flow__controls-button { background: white !important; border: none !important; border-bottom: 1px solid var(--border) !important; color: var(--text-secondary) !important; }
+.react-flow__controls-button:hover { background: var(--bg) !important; }
+.react-flow__minimap { border-radius: 12px !important; box-shadow: var(--shadow-md) !important; border: 1px solid var(--border) !important; overflow: hidden; }

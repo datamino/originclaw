@@ -1,0 +1,35 @@
+[project]
+name = "originclaw-monitor"
+version = "0.1.0"
+description = "Observability for OpenClaw agentic AI deployments — monitoring, alerting, watchdog, dashboard"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Origin Studios" }]
+keywords = ["openclaw", "monitoring", "observability", "agentic", "ai", "alerting"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+    "psutil>=5.9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/originclaw/monitor"
+Documentation = "https://docs.originclaw.ai/monitor"
+
+[project.scripts]
+originclaw-monitor = "originclaw_monitor.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["originclaw_monitor"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
