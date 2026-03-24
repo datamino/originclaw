@@ -3,7 +3,7 @@ name = "originclaw-monitor"
 version = "0.1.5"
 description = "Observability for OpenClaw agentic AI deployments — monitoring, alerting, watchdog, dashboard"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Origin Studios" }]
 keywords = ["openclaw", "monitoring", "observability", "agentic", "ai", "alerting"]
